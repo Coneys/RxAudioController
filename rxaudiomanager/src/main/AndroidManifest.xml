@@ -1,0 +1,9 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="github.com.coneey.rxaudiomanager">
+
+    <application>
+
+        <service android:name=".serviceMediaManager.PlayerService" />
+    </application>
+
+</manifest>
