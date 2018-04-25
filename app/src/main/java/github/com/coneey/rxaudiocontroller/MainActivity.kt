@@ -3,17 +3,42 @@ package github.com.coneey.rxaudiocontroller
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import github.com.coneey.rxaudiomanager.MediaManagerFactory
+import io.reactivex.disposables.Disposable
+import kotlinx.android.synthetic.main.activity_main.view.*
+import org.jetbrains.anko.contentView
 
 class MainActivity : AppCompatActivity() {
 
+    var disposable: Disposable? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        if (savedInstanceState == null) {
-            println("CREATING SERVICE!")
-            val manager = MediaManagerFactory.getServiceMediaManager(this)
-            manager.loadStreamMusic("https://www.ssaurel.com/tmp/mymusic.mp3")
+        val manager = MediaManagerFactory.getServiceMediaManager(this)
+
+        contentView!!.resume_button.setOnClickListener {
+            manager.resume()
         }
+
+        contentView!!.pause_button.setOnClickListener {
+            manager.pause()
+        }
+
+        contentView!!.stop_button.setOnClickListener {
+            manager.stop()
+        }
+
+
+        disposable = manager.getMediaInfoObservable().subscribe {
+            println(it)
+        }
+        if (savedInstanceState == null) {
+            manager.loadExternalFileMusic("Music/stephen_stay.mp3")
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        disposable?.dispose()
     }
 }

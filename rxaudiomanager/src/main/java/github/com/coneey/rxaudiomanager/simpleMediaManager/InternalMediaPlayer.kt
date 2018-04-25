@@ -9,15 +9,18 @@ import android.content.res.AssetFileDescriptor
 import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.MediaPlayer
-import github.com.coneey.rxaudiomanager.MediaListenerResolver
+import android.os.Environment
+import github.com.coneey.rxaudiomanager.mediaListener.MediaInfo
+import github.com.coneey.rxaudiomanager.mediaListener.MediaStateResolver
+import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.Subject
 import java.io.FileDescriptor
 
-open class SimpleMediaManager(val player: MediaPlayer, val context: Context,
-                              val resolver: MediaListenerResolver = MediaListenerResolver(player)) : MediaManager {
+open class InternalMediaPlayer(val player: MediaPlayer, val context: Context,
+                               val resolver: MediaStateResolver = MediaStateResolver(player)) : MediaManager {
 
 
     private val resources = context.resources
@@ -53,8 +56,33 @@ open class SimpleMediaManager(val player: MediaPlayer, val context: Context,
         mediaSubject.onNext((attributes ?: audioAttributes) to assetFileDescriptor)
     }
 
-    fun pause() {
-        player.pause()
+    override fun loadExternalFileMusic(filePath: String, attributes: AudioAttributes?) {
+        val audioAttributes = AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_MEDIA)
+                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build()
+        val path = "${Environment.getExternalStorageDirectory()}/$filePath"
+        mediaSubject.onNext((attributes ?: audioAttributes) to path)
+    }
+
+    override fun getMediaInfoObservable(): Observable<MediaInfo> = resolver.infoSubject
+
+
+    override fun pause() {
+        resolver.pause()
+
+    }
+
+    override fun resume() {
+        resolver.resume()
+    }
+
+    override fun stop() {
+        resolver.stop()
+    }
+
+    override fun finish() {
+        resolver.finalize()
+        mediaDisposable?.dispose()
     }
 
 
@@ -78,24 +106,19 @@ open class SimpleMediaManager(val player: MediaPlayer, val context: Context,
         }
     }
 
-    fun postWhenPrepared(runnable: (MediaPlayer) -> Unit) = resolver.postWhenPrepared(runnable)
 
-    override fun finish() {
-        resolver.finalize()
-        mediaDisposable?.dispose()
-    }
-
-    fun initializeLifeCycle() {
+    private fun initializeLifeCycle() {
         if (context is LifecycleOwner) {
             context.lifecycle.addObserver(object : LifecycleObserver {
                 @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
                 fun clear() {
-                    println("CALLING FINALIZE")
                     finish()
                 }
             })
         }
     }
+
+    fun postWhenPrepared(runnable: (MediaPlayer) -> Unit) = resolver.postWhenPrepared(runnable)
 
 
 }
