@@ -7,8 +7,8 @@ import android.media.MediaPlayer
 import android.support.v7.app.AppCompatActivity
 import com.tbruyelle.rxpermissions2.RxPermissions
 
-class SimpleMediaPlayer internal constructor(private val context: Context, player: MediaPlayer,
-                                             private val internalMediaPlayer: InternalMediaPlayer = InternalMediaPlayer(player, context))
+class SimpleMediaManager internal constructor(private val context: Context, player: MediaPlayer,
+                                              private val internalMediaPlayer: InternalMediaPlayer = InternalMediaPlayer(player, context))
     : MediaManager by internalMediaPlayer {
 
     override fun loadExternalFileMusic(filePath: String, attributes: AudioAttributes?) {

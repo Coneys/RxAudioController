@@ -14,7 +14,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val manager = MediaManagerFactory.getServiceMediaManager(this)
+        val manager = MediaManagerFactory.getMediaManager(this)
 
         contentView!!.resume_button.setOnClickListener {
             manager.resume()
@@ -28,6 +28,9 @@ class MainActivity : AppCompatActivity() {
             manager.stop()
         }
 
+        contentView!!.seek_button.setOnClickListener {
+            manager.seekTo(2000)
+        }
 
         disposable = manager.getMediaInfoObservable().subscribe {
             println(it)
@@ -35,7 +38,9 @@ class MainActivity : AppCompatActivity() {
         if (savedInstanceState == null) {
             manager.loadExternalFileMusic("Music/stephen_stay.mp3")
         }
+
     }
+    // internal, seekTo, czas całkowity
 
     override fun onDestroy() {
         super.onDestroy()

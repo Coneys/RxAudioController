@@ -2,6 +2,7 @@ package github.com.coneey.rxaudiomanager.simpleMediaManager
 
 import android.media.AudioAttributes
 import github.com.coneey.rxaudiomanager.mediaListener.MediaInfo
+import github.com.coneey.rxaudiomanager.mediaListener.Millisecond
 import github.com.coneey.rxaudiomanager.serviceMediaManager.ServiceCommand
 import io.reactivex.Observable
 import io.reactivex.subjects.BehaviorSubject
@@ -25,7 +26,15 @@ object MediaServiceCommandEmitter : MediaManager {
     }
 
     override fun loadExternalFileMusic(filePath: String, attributes: AudioAttributes?) {
-        commandSubject.onNext(ServiceCommand.LoadFileMusic(filePath, attributes))
+        commandSubject.onNext(ServiceCommand.LoadExternalFileMusic(filePath, attributes))
+    }
+
+    override fun loadInternalFileMusic(filePath: String, attributes: AudioAttributes?) {
+        commandSubject.onNext(ServiceCommand.LoadInternalFileMusic(filePath, attributes))
+    }
+
+    override fun seekTo(millisecond: Millisecond) {
+        commandSubject.onNext(ServiceCommand.SeekTo(millisecond))
     }
 
     override fun finish() {

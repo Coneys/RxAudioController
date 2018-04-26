@@ -12,6 +12,7 @@ import android.media.MediaPlayer
 import android.os.Environment
 import github.com.coneey.rxaudiomanager.mediaListener.MediaInfo
 import github.com.coneey.rxaudiomanager.mediaListener.MediaStateResolver
+import github.com.coneey.rxaudiomanager.mediaListener.Millisecond
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.subscribeBy
@@ -31,8 +32,8 @@ open class InternalMediaPlayer(val player: MediaPlayer, val context: Context,
     init {
         resolver.initialize()
         initializeLifeCycle()
+
         mediaDisposable = mediaSubject
-                .doOnNext { println("SOMETHING ARRIVED ${it.second}") }
                 .subscribeBy(
                         onError = { throw it },
                         onNext = { startMusic(it) }
@@ -62,6 +63,19 @@ open class InternalMediaPlayer(val player: MediaPlayer, val context: Context,
                 .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build()
         val path = "${Environment.getExternalStorageDirectory()}/$filePath"
         mediaSubject.onNext((attributes ?: audioAttributes) to path)
+    }
+
+    override fun loadInternalFileMusic(filePath: String, attributes: AudioAttributes?) {
+        val audioAttributes = AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_MEDIA)
+                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build()
+        val path = "${context.cacheDir}/$filePath"
+        mediaSubject.onNext((attributes ?: audioAttributes) to path)
+    }
+
+    override fun seekTo(millisecond: Millisecond) {
+
+        resolver.seekTo(millisecond)
     }
 
     override fun getMediaInfoObservable(): Observable<MediaInfo> = resolver.infoSubject

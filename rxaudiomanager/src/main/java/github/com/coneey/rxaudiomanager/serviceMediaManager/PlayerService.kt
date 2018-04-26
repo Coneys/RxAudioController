@@ -25,13 +25,13 @@ class PlayerService : LifecycleService() {
     private fun listenForMedia() {
         if (mediaServiceDisposable == null) {
             mediaServiceDisposable = MediaServiceCommandEmitter.commandSubject.subscribe {
-                println("COMMAND ARRIVED $it")
                 when (it) {
                     is ServiceCommand.Finish -> stopSelf()
                     is ServiceCommand.Stop -> mediaManager.stop()
                     is ServiceCommand.LoadStreamMusic -> mediaManager.loadStreamMusic(it.url, it.attr)
                     is ServiceCommand.LoadResourceMusic -> mediaManager.loadResourceMusic(it.resourceId, it.attr)
-                    is ServiceCommand.LoadFileMusic -> mediaManager.loadExternalFileMusic(it.filePath, it.attr)
+                    is ServiceCommand.LoadExternalFileMusic -> mediaManager.loadExternalFileMusic(it.filePath, it.attr)
+                    is ServiceCommand.LoadInternalFileMusic -> mediaManager.loadInternalFileMusic(it.filePath, it.attr)
                     is ServiceCommand.Pause -> mediaManager.pause()
                     is ServiceCommand.Resume -> mediaManager.resume()
                 }

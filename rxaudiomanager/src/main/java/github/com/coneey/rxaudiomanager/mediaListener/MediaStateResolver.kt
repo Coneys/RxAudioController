@@ -7,7 +7,7 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.functions.BiFunction
-import io.reactivex.functions.Function3
+import io.reactivex.functions.Function4
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
@@ -28,9 +28,12 @@ class MediaStateResolver(private val player: MediaPlayer) : MediaPlayer.OnPrepar
     private val stateSubject: Subject<MediaState> = BehaviorSubject.create()
     private val bufferSubject: Subject<Percent> = BehaviorSubject.create()
     private val positionSubject: Subject<Second> = BehaviorSubject.create()
+    private val durationSubject: Subject<Second> = BehaviorSubject.create()
 
-    private val infoFunction3 = Function3 { t1: MediaState, t2: Percent, t3: Second -> MediaInfo(t1, t2, t3) }
-    val infoSubject: Observable<MediaInfo> = Observable.combineLatest(stateSubject.startWith(MediaState.STOPPED), bufferSubject.startWith(100), positionSubject.startWith(0), infoFunction3)
+    private val infoFunction4 = Function4 { t1: MediaState, t2: Percent, t3: Second, t4: Second -> MediaInfo(t1, t2, t3, t3 / 1000, t4) }
+    val infoSubject: Observable<MediaInfo> = Observable.combineLatest(
+            stateSubject.startWith(MediaState.STOPPED), bufferSubject.startWith(100),
+            positionSubject.startWith(0), durationSubject.startWith(0), infoFunction4)
 
     fun initialize(): Observable<MediaInfo> {
         player.let {
@@ -92,6 +95,7 @@ class MediaStateResolver(private val player: MediaPlayer) : MediaPlayer.OnPrepar
     internal fun startPlayer(mp: MediaPlayer) {
         mp.start()
         stateSubject.onNext(MediaState.RUNNING)
+        durationSubject.onNext(mp.duration)
         startRefreshInterval(mp)
     }
 
@@ -103,7 +107,7 @@ class MediaStateResolver(private val player: MediaPlayer) : MediaPlayer.OnPrepar
 
         refreshIntervalDisposable?.dispose()
         refreshIntervalDisposable = Observable
-                .combineLatest(Observable.interval(1, TimeUnit.SECONDS, Schedulers.newThread()), stateSubject, stateAndTimeBiFUnction)
+                .combineLatest(Observable.interval(500, TimeUnit.MILLISECONDS, Schedulers.newThread()), stateSubject, stateAndTimeBiFUnction)
                 .filter { it.second == MediaState.RUNNING }
                 .subscribeBy(onNext = { positionSubject.onNext(mp.currentPosition) })
     }
@@ -133,6 +137,12 @@ class MediaStateResolver(private val player: MediaPlayer) : MediaPlayer.OnPrepar
             positionSubject.onNext(0)
             stateSubject.onNext(MediaState.STOPPED)
         }
+    }
+
+    fun seekTo(millisecond: Millisecond) {
+        if (player.isPlaying)
+            player.seekTo(millisecond)
+        positionSubject.onNext(millisecond)
     }
 
 
