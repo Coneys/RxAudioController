@@ -34,6 +34,8 @@ class PlayerService : LifecycleService() {
                     is ServiceCommand.LoadInternalFileMusic -> mediaManager.loadInternalFileMusic(it.filePath, it.attr)
                     is ServiceCommand.Pause -> mediaManager.pause()
                     is ServiceCommand.Resume -> mediaManager.resume()
+                    is ServiceCommand.SeekTo -> mediaManager.seekTo(it.millisecond)
+
                 }
             }
             mediaListenerResolver.infoSubject.subscribe(MediaServiceCommandEmitter.mediaInfoSubject)
