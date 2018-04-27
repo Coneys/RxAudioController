@@ -145,5 +145,9 @@ class MediaStateResolver(private val player: MediaPlayer) : MediaPlayer.OnPrepar
         positionSubject.onNext(millisecond)
     }
 
+    fun startMusic() {
+        stateSubject.onNext(MediaState.PREPARING)
+    }
+
 
 }
