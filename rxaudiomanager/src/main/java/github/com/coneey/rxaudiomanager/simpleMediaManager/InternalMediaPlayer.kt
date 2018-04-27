@@ -113,7 +113,6 @@ open class InternalMediaPlayer(val player: MediaPlayer, val context: Context,
                     is AssetFileDescriptor -> it.setDataSource(dataSource.fileDescriptor, dataSource.startOffset, dataSource.length)
                     is FileDescriptor -> it.setDataSource(dataSource)
                 }
-                resolver.startMusic()
                 it.prepareAsync()
             }
 
