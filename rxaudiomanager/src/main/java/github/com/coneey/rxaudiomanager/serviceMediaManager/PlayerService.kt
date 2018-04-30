@@ -35,7 +35,7 @@ class PlayerService : LifecycleService() {
                     is ServiceCommand.Pause -> mediaManager.pause()
                     is ServiceCommand.Resume -> mediaManager.resume()
                     is ServiceCommand.SeekTo -> mediaManager.seekTo(it.millisecond)
-                    is ServiceCommand.Restart -> mediaManager.restart()
+                    is ServiceCommand.Restart -> mediaManager.reset()
                     is ServiceCommand.Start -> mediaManager.start()
 
                 }

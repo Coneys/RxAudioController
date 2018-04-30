@@ -105,7 +105,8 @@ open class InternalMediaPlayer(val player: MediaPlayer, val context: Context,
         mediaDisposable?.dispose()
     }
 
-    override fun restart() {
+    override fun reset() {
+        resolver.reset()
         val audioAttr = currentAudioAttributes
         val datasource = currentDataSource
         if (datasource != null && audioAttr != null) {

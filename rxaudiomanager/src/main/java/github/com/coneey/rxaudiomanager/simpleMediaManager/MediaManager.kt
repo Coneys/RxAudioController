@@ -17,7 +17,7 @@ interface MediaManager {
     fun start()
     fun resume()
     fun stop()
-    fun restart()
+    fun reset()
     fun getMediaInfoObservable(): Observable<MediaInfo>
 
 }

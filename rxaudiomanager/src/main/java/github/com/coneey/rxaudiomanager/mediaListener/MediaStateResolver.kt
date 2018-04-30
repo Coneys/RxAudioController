@@ -33,7 +33,7 @@ class MediaStateResolver(private val player: MediaPlayer) : MediaPlayer.OnPrepar
 
     private val infoFunction4 = Function4 { t1: MediaState, t2: Percent, t3: Second, t4: Second -> MediaInfo(t1, t2, t3, t3 / 1000, t4) }
     val infoSubject: Observable<MediaInfo> = Observable.combineLatest(
-            stateSubject.startWith(MediaState.PREPARING), bufferSubject.startWith(0),
+            stateSubject.startWith(MediaState.EMPTY), bufferSubject.startWith(0),
             positionSubject.startWith(0), durationSubject.startWith(0), infoFunction4)
 
     fun initialize(): Observable<MediaInfo> {
@@ -56,6 +56,7 @@ class MediaStateResolver(private val player: MediaPlayer) : MediaPlayer.OnPrepar
 
 
     override fun onPrepared(mp: MediaPlayer) {
+        preapred = true
         onPreparedRunnables.forEach { it.invoke(mp) }
         onPreparedRunnables.clear()
     }
@@ -141,6 +142,7 @@ class MediaStateResolver(private val player: MediaPlayer) : MediaPlayer.OnPrepar
             stateSubject.onNext(MediaState.STOPPED)
         }
     }
+
     fun start() {
         if (!player.isPlaying) {
             postWhenPrepared {
@@ -159,7 +161,9 @@ class MediaStateResolver(private val player: MediaPlayer) : MediaPlayer.OnPrepar
         stateSubject.onNext(preparing)
     }
 
-
-
+    fun reset() {
+        player.reset()
+        preapred = false
+    }
 
 }
