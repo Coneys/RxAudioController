@@ -72,7 +72,7 @@ class MediaStateResolver(private val player: MediaPlayer) : MediaPlayer.OnPrepar
     }
 
     override fun onCompletion(mp: MediaPlayer) {
-        stateSubject.onNext(MediaState.STOPPED)
+        stateSubject.onNext(MediaState.COMPLETED)
         positionSubject.onNext(0)
         mp.reset()
     }
