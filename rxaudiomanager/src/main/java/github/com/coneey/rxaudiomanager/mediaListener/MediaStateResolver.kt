@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit
 typealias MediaRunnable = (MediaPlayer) -> Unit
 
 class MediaStateResolver(private val player: MediaPlayer) : MediaPlayer.OnPreparedListener,
-        MediaPlayer.OnErrorListener, MediaPlayer.OnSeekCompleteListener,
+        MediaPlayer.OnErrorListener, MediaPlayer.OnCompletionListener,
         MediaPlayer.OnInfoListener, MediaPlayer.OnBufferingUpdateListener,
         AudioManager.OnAudioFocusChangeListener {
 
@@ -39,7 +39,7 @@ class MediaStateResolver(private val player: MediaPlayer) : MediaPlayer.OnPrepar
         player.let {
             it.setOnPreparedListener(this)
             it.setOnErrorListener(this)
-            it.setOnSeekCompleteListener(this)
+            it.setOnCompletionListener(this)
             it.setOnInfoListener(this)
             it.setOnBufferingUpdateListener(this)
         }
@@ -70,8 +70,9 @@ class MediaStateResolver(private val player: MediaPlayer) : MediaPlayer.OnPrepar
         return false
     }
 
-    override fun onSeekComplete(mp: MediaPlayer) {
+    override fun onCompletion(mp: MediaPlayer) {
         stateSubject.onNext(MediaState.STOPPED)
+        mp.reset()
     }
 
     override fun onInfo(mp: MediaPlayer, what: Int, extra: Int): Boolean {
