@@ -57,5 +57,9 @@ object MediaServiceCommandEmitter : MediaManager {
         commandSubject.onNext(ServiceCommand.Restart)
     }
 
+    override fun start() {
+        commandSubject.onNext(ServiceCommand.Start)
+    }
+
 
 }

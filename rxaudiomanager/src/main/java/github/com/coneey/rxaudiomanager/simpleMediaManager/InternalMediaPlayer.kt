@@ -77,7 +77,6 @@ open class InternalMediaPlayer(val player: MediaPlayer, val context: Context,
     }
 
     override fun seekTo(millisecond: Millisecond) {
-
         resolver.seekTo(millisecond)
     }
 
@@ -95,6 +94,10 @@ open class InternalMediaPlayer(val player: MediaPlayer, val context: Context,
 
     override fun stop() {
         resolver.stop()
+    }
+
+    override fun start() {
+        resolver.start()
     }
 
     override fun finish() {

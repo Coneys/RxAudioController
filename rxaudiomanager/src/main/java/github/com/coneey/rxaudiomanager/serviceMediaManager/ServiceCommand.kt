@@ -9,6 +9,7 @@ sealed class ServiceCommand {
     object Resume : ServiceCommand()
     object Finish : ServiceCommand()
     object Restart : ServiceCommand()
+    object Start : ServiceCommand()
     class SeekTo(val millisecond: Millisecond) : ServiceCommand()
     class LoadStreamMusic(val url: String, val attr: AudioAttributes?) : ServiceCommand()
     class LoadResourceMusic(val resourceId: Int, val attr: AudioAttributes?) : ServiceCommand()
