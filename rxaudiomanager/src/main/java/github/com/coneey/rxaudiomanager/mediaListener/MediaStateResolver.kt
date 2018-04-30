@@ -71,7 +71,7 @@ class MediaStateResolver(private val player: MediaPlayer) : MediaPlayer.OnPrepar
     }
 
     override fun onSeekComplete(mp: MediaPlayer) {
-        // println("COMPLETED SEEK")
+        stateSubject.onNext(MediaState.STOPPED)
     }
 
     override fun onInfo(mp: MediaPlayer, what: Int, extra: Int): Boolean {
@@ -144,7 +144,6 @@ class MediaStateResolver(private val player: MediaPlayer) : MediaPlayer.OnPrepar
             player.seekTo(millisecond)
         positionSubject.onNext(millisecond)
     }
-
 
 
 }
