@@ -38,19 +38,23 @@ object MediaServiceCommandEmitter : MediaManager {
     }
 
     override fun finish() {
-        commandSubject.onNext(ServiceCommand.Finish())
+        commandSubject.onNext(ServiceCommand.Finish)
     }
 
     override fun pause() {
-        commandSubject.onNext(ServiceCommand.Pause())
+        commandSubject.onNext(ServiceCommand.Pause)
     }
 
     override fun resume() {
-        commandSubject.onNext(ServiceCommand.Resume())
+        commandSubject.onNext(ServiceCommand.Resume)
     }
 
     override fun stop() {
-        commandSubject.onNext(ServiceCommand.Stop())
+        commandSubject.onNext(ServiceCommand.Stop)
+    }
+
+    override fun restart() {
+        commandSubject.onNext(ServiceCommand.Restart)
     }
 
 

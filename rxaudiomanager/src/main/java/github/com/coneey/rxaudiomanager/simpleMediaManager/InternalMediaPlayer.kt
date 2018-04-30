@@ -11,6 +11,7 @@ import android.media.AudioManager
 import android.media.MediaPlayer
 import android.os.Environment
 import github.com.coneey.rxaudiomanager.mediaListener.MediaInfo
+import github.com.coneey.rxaudiomanager.mediaListener.MediaState
 import github.com.coneey.rxaudiomanager.mediaListener.MediaStateResolver
 import github.com.coneey.rxaudiomanager.mediaListener.Millisecond
 import io.reactivex.Observable
@@ -28,6 +29,8 @@ open class InternalMediaPlayer(val player: MediaPlayer, val context: Context,
     private val mediaSubject: Subject<Pair<AudioAttributes, Any>> = BehaviorSubject.create()
     private var mediaDisposable: Disposable? = null
 
+    private var currentDataSource: String? = null
+    private var currentAudioAttributes: AudioAttributes? = null
 
     init {
         resolver.initialize()
@@ -99,6 +102,13 @@ open class InternalMediaPlayer(val player: MediaPlayer, val context: Context,
         mediaDisposable?.dispose()
     }
 
+    override fun restart() {
+        val audioAttr = currentAudioAttributes
+        val datasource = currentDataSource
+        if (datasource != null && audioAttr != null) {
+            mediaSubject.onNext(audioAttr to datasource)
+        }
+    }
 
     fun startMusic(pair: Pair<AudioAttributes, Any>) {
 
@@ -113,7 +123,10 @@ open class InternalMediaPlayer(val player: MediaPlayer, val context: Context,
                     is AssetFileDescriptor -> it.setDataSource(dataSource.fileDescriptor, dataSource.startOffset, dataSource.length)
                     is FileDescriptor -> it.setDataSource(dataSource)
                 }
+                currentDataSource = dataSource.toString()
+                currentAudioAttributes = pair.first
                 it.prepareAsync()
+                resolver.pushState(MediaState.PREPARING)
             }
 
         }
