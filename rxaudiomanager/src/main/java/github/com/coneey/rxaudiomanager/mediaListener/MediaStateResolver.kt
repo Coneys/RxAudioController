@@ -56,7 +56,6 @@ class MediaStateResolver(private val player: MediaPlayer) : MediaPlayer.OnPrepar
 
 
     override fun onPrepared(mp: MediaPlayer) {
-        startPlayer(mp)
         onPreparedRunnables.forEach { it.invoke(mp) }
         onPreparedRunnables.clear()
     }
