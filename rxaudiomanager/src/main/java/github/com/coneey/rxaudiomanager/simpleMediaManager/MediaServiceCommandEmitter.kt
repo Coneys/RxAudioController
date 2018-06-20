@@ -8,7 +8,7 @@ import io.reactivex.Observable
 import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.Subject
 
-object MediaServiceCommandEmitter : MediaManager {
+internal object MediaServiceCommandEmitter : MediaManager {
 
     val mediaInfoSubject: Subject<MediaInfo> = BehaviorSubject.create()
     val commandSubject: Subject<ServiceCommand> = BehaviorSubject.create()
@@ -38,19 +38,27 @@ object MediaServiceCommandEmitter : MediaManager {
     }
 
     override fun finish() {
-        commandSubject.onNext(ServiceCommand.Finish())
+        commandSubject.onNext(ServiceCommand.Finish)
     }
 
     override fun pause() {
-        commandSubject.onNext(ServiceCommand.Pause())
+        commandSubject.onNext(ServiceCommand.Pause)
     }
 
     override fun resume() {
-        commandSubject.onNext(ServiceCommand.Resume())
+        commandSubject.onNext(ServiceCommand.Resume)
     }
 
     override fun stop() {
-        commandSubject.onNext(ServiceCommand.Stop())
+        commandSubject.onNext(ServiceCommand.Stop)
+    }
+
+    override fun reset() {
+        commandSubject.onNext(ServiceCommand.Restart)
+    }
+
+    override fun start() {
+        commandSubject.onNext(ServiceCommand.Start)
     }
 
 

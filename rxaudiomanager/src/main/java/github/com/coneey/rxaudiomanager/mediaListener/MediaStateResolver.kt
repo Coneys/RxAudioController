@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit
 typealias MediaRunnable = (MediaPlayer) -> Unit
 
 class MediaStateResolver(private val player: MediaPlayer) : MediaPlayer.OnPreparedListener,
-        MediaPlayer.OnErrorListener, MediaPlayer.OnSeekCompleteListener,
+        MediaPlayer.OnErrorListener, MediaPlayer.OnCompletionListener,
         MediaPlayer.OnInfoListener, MediaPlayer.OnBufferingUpdateListener,
         AudioManager.OnAudioFocusChangeListener {
 
@@ -29,18 +29,18 @@ class MediaStateResolver(private val player: MediaPlayer) : MediaPlayer.OnPrepar
     private val bufferSubject: Subject<Percent> = BehaviorSubject.create()
     private val positionSubject: Subject<Second> = BehaviorSubject.create()
     private val durationSubject: Subject<Second> = BehaviorSubject.create()
-    private var prepared = false
+    private var preapred = false
 
     private val infoFunction4 = Function4 { t1: MediaState, t2: Percent, t3: Second, t4: Second -> MediaInfo(t1, t2, t3, t3 / 1000, t4) }
     val infoSubject: Observable<MediaInfo> = Observable.combineLatest(
-            stateSubject.startWith(MediaState.PREPARING), bufferSubject.startWith(100),
+            stateSubject.startWith(MediaState.EMPTY), bufferSubject.startWith(0),
             positionSubject.startWith(0), durationSubject.startWith(0), infoFunction4)
 
     fun initialize(): Observable<MediaInfo> {
         player.let {
             it.setOnPreparedListener(this)
             it.setOnErrorListener(this)
-            it.setOnSeekCompleteListener(this)
+            it.setOnCompletionListener(this)
             it.setOnInfoListener(this)
             it.setOnBufferingUpdateListener(this)
         }
@@ -56,7 +56,7 @@ class MediaStateResolver(private val player: MediaPlayer) : MediaPlayer.OnPrepar
 
 
     override fun onPrepared(mp: MediaPlayer) {
-        startPlayer(mp)
+        preapred = true
         onPreparedRunnables.forEach { it.invoke(mp) }
         onPreparedRunnables.clear()
     }
@@ -71,8 +71,10 @@ class MediaStateResolver(private val player: MediaPlayer) : MediaPlayer.OnPrepar
         return false
     }
 
-    override fun onSeekComplete(mp: MediaPlayer) {
-        // println("COMPLETED SEEK")
+    override fun onCompletion(mp: MediaPlayer) {
+        stateSubject.onNext(MediaState.COMPLETED)
+        positionSubject.onNext(0)
+        mp.reset()
     }
 
     override fun onInfo(mp: MediaPlayer, what: Int, extra: Int): Boolean {
@@ -90,11 +92,9 @@ class MediaStateResolver(private val player: MediaPlayer) : MediaPlayer.OnPrepar
     }
 
     fun postWhenPrepared(runnable: MediaRunnable) {
-        if (prepared)
-            runnable.invoke(player)
+        if (preapred) runnable.invoke(player)
         else
             onPreparedRunnables.add(runnable)
-
     }
 
     internal fun startPlayer(mp: MediaPlayer) {
@@ -137,10 +137,17 @@ class MediaStateResolver(private val player: MediaPlayer) : MediaPlayer.OnPrepar
 
     fun stop() {
         if (player.isPlaying) {
-            println("STOPPING")
             player.pause()
             positionSubject.onNext(0)
             stateSubject.onNext(MediaState.STOPPED)
+        }
+    }
+
+    fun start() {
+        if (!player.isPlaying) {
+            postWhenPrepared {
+                startPlayer(it)
+            }
         }
     }
 
@@ -150,5 +157,13 @@ class MediaStateResolver(private val player: MediaPlayer) : MediaPlayer.OnPrepar
         positionSubject.onNext(millisecond)
     }
 
+    internal fun pushState(preparing: MediaState) {
+        stateSubject.onNext(preparing)
+    }
+
+    fun reset() {
+        player.reset()
+        preapred = false
+    }
 
 }

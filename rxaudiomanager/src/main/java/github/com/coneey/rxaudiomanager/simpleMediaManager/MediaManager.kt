@@ -14,8 +14,10 @@ interface MediaManager {
     fun seekTo(millisecond: Millisecond)
     fun finish()
     fun pause()
+    fun start()
     fun resume()
     fun stop()
+    fun reset()
     fun getMediaInfoObservable(): Observable<MediaInfo>
 
 }
