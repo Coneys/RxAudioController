@@ -29,6 +29,7 @@ class MediaStateResolver(private val player: MediaPlayer) : MediaPlayer.OnPrepar
     private val bufferSubject: Subject<Percent> = BehaviorSubject.create()
     private val positionSubject: Subject<Second> = BehaviorSubject.create()
     private val durationSubject: Subject<Second> = BehaviorSubject.create()
+    private var prepared = false
 
     private val infoFunction4 = Function4 { t1: MediaState, t2: Percent, t3: Second, t4: Second -> MediaInfo(t1, t2, t3, t3 / 1000, t4) }
     val infoSubject: Observable<MediaInfo> = Observable.combineLatest(
@@ -89,7 +90,11 @@ class MediaStateResolver(private val player: MediaPlayer) : MediaPlayer.OnPrepar
     }
 
     fun postWhenPrepared(runnable: MediaRunnable) {
-        onPreparedRunnables.add(runnable)
+        if (prepared)
+            runnable.invoke(player)
+        else
+            onPreparedRunnables.add(runnable)
+
     }
 
     internal fun startPlayer(mp: MediaPlayer) {
@@ -144,7 +149,6 @@ class MediaStateResolver(private val player: MediaPlayer) : MediaPlayer.OnPrepar
             player.seekTo(millisecond)
         positionSubject.onNext(millisecond)
     }
-
 
 
 }
