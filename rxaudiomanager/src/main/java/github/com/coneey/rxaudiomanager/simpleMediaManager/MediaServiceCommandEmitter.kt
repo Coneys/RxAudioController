@@ -13,6 +13,11 @@ internal object MediaServiceCommandEmitter : MediaManager {
     val mediaInfoSubject: Subject<MediaInfo> = BehaviorSubject.create()
     val commandSubject: Subject<ServiceCommand> = BehaviorSubject.create()
 
+    init {
+        commandSubject.doOnNext {
+            println("COMMAND ARRIVED $it")
+        }
+    }
 
     override fun getMediaInfoObservable(): Observable<MediaInfo> = mediaInfoSubject
 

@@ -14,7 +14,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val manager = MediaManagerFactory.getMediaManager(this)
+        val manager = MediaManagerFactory.getServiceMediaManager(this)
 
         contentView!!.resume_button.setOnClickListener {
             manager.resume()
@@ -28,19 +28,24 @@ class MainActivity : AppCompatActivity() {
             manager.stop()
         }
 
-        contentView!!.seek_button.setOnClickListener {
-            manager.seekTo(2000)
+        contentView!!.stream_button.setOnClickListener {
+            manager.loadStreamMusic("http://janowlubelski.treespot.pl/media/get/149")
+            manager.start()
         }
 
         disposable = manager.getMediaInfoObservable().subscribe {
             println(it)
         }
         if (savedInstanceState == null) {
-            manager.loadExternalFileMusic("Music/stephen_stay.mp3")
+
+            manager.useService {
+                manager.loadExternalFileMusic("Music/stephen_stay.mp3")
+                manager.start()
+            }
         }
 
     }
-    // internal, seekTo, czas całkowity
+
 
     override fun onDestroy() {
         super.onDestroy()

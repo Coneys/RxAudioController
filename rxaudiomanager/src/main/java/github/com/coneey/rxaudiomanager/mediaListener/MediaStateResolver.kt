@@ -126,12 +126,14 @@ class MediaStateResolver(private val player: MediaPlayer) : MediaPlayer.OnPrepar
 
     fun resume() {
         if (!player.isPlaying) {
-            positionSubject.take(1)
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe {
-                        player.seekTo(it)
-                        startPlayer(player)
-                    }
+            postWhenPrepared { player ->
+                positionSubject.take(1)
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe {
+                            player.seekTo(it)
+                            startPlayer(player)
+                        }
+            }
         }
     }
 
@@ -163,6 +165,7 @@ class MediaStateResolver(private val player: MediaPlayer) : MediaPlayer.OnPrepar
 
     fun reset() {
         player.reset()
+        onPreparedRunnables.clear()
         preapred = false
     }
 

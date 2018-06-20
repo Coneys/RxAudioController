@@ -7,12 +7,34 @@ import android.support.v7.app.AppCompatActivity
 import com.tbruyelle.rxpermissions2.RxPermissions
 import github.com.coneey.rxaudiomanager.simpleMediaManager.MediaManager
 import github.com.coneey.rxaudiomanager.simpleMediaManager.MediaServiceCommandEmitter
+import io.reactivex.disposables.Disposable
 import org.jetbrains.anko.startService
 
+typealias ServiceRunnable = (ServiceMediaManager) -> Unit
+
 class ServiceMediaManager(val context: Context) : MediaManager by MediaServiceCommandEmitter {
+
+    private var observingServiceStateDisposable: Disposable? = null
+    private var serviceListening = false
+
     init {
         context.startService<PlayerService>()
+        observingServiceStateDisposable = PlayerService.listening.subscribe {
+            println("SOMETHING ARRIVED $it")
+            serviceListening = it
+            if (it) {
+                executeAndClear()
+            }
+        }
     }
+
+    private fun executeAndClear() {
+        runnables.forEach { it(this) }
+        runnables.clear()
+    }
+
+    private val runnables: MutableList<ServiceRunnable> = ArrayList()
+
 
     override fun loadExternalFileMusic(filePath: String, attributes: AudioAttributes?) {
 
@@ -24,6 +46,20 @@ class ServiceMediaManager(val context: Context) : MediaManager by MediaServiceCo
                     .subscribe { if (it) MediaServiceCommandEmitter.loadExternalFileMusic(filePath, attributes) } // FIXME add disposable?
         } else throw RuntimeException("Context has to be AppCompatActivity!")
 
+    }
+
+    fun useService(func: ServiceRunnable) {
+        println("TRYTING TO USE SERVICE BUT $serviceListening")
+        if (serviceListening) {
+            func.invoke(this)
+        } else {
+            runnables.add(func)
+        }
+    }
+
+    override fun finish() {
+        observingServiceStateDisposable?.dispose()
+        MediaServiceCommandEmitter.finish()
     }
 
 

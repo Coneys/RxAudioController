@@ -7,6 +7,8 @@ import github.com.coneey.rxaudiomanager.mediaListener.MediaStateResolver
 import github.com.coneey.rxaudiomanager.simpleMediaManager.InternalMediaPlayer
 import github.com.coneey.rxaudiomanager.simpleMediaManager.MediaServiceCommandEmitter
 import io.reactivex.disposables.Disposable
+import io.reactivex.subjects.BehaviorSubject
+import io.reactivex.subjects.Subject
 
 
 class PlayerService : LifecycleService() {
@@ -16,6 +18,10 @@ class PlayerService : LifecycleService() {
     internal val mediaManager by lazy { InternalMediaPlayer(mediaPlayer, this, mediaListenerResolver) }
     var mediaServiceDisposable: Disposable? = null
 
+    companion object {
+        val listening: Subject<Boolean> = BehaviorSubject.create()
+    }
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
         listenForMedia()
@@ -24,13 +30,19 @@ class PlayerService : LifecycleService() {
 
     private fun listenForMedia() {
         if (mediaServiceDisposable == null) {
+
+
             mediaServiceDisposable = MediaServiceCommandEmitter.commandSubject.subscribe {
                 when (it) {
                     is ServiceCommand.Finish -> stopSelf()
                     is ServiceCommand.Stop -> mediaManager.stop()
                     is ServiceCommand.LoadStreamMusic -> mediaManager.loadStreamMusic(it.url, it.attr)
                     is ServiceCommand.LoadResourceMusic -> mediaManager.loadResourceMusic(it.resourceId, it.attr)
-                    is ServiceCommand.LoadExternalFileMusic -> mediaManager.loadExternalFileMusic(it.filePath, it.attr)
+                    is ServiceCommand.LoadExternalFileMusic -> {
+                        println("WTF STARTING")
+                        mediaManager.loadExternalFileMusic(it.filePath, it.attr)
+                        println("WTF ENDING")
+                    }
                     is ServiceCommand.LoadInternalFileMusic -> mediaManager.loadInternalFileMusic(it.filePath, it.attr)
                     is ServiceCommand.Pause -> mediaManager.pause()
                     is ServiceCommand.Resume -> mediaManager.resume()
@@ -40,6 +52,7 @@ class PlayerService : LifecycleService() {
 
                 }
             }
+            listening.onNext(true)
             mediaListenerResolver.infoSubject.subscribe(MediaServiceCommandEmitter.mediaInfoSubject)
         }
 
@@ -50,8 +63,13 @@ class PlayerService : LifecycleService() {
         mediaManager.finish()
         mediaListenerResolver.finalize()
         mediaServiceDisposable?.dispose()
+        listening.onNext(false)
         println("DESTROY SERVICE")
     }
 
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        super.onTaskRemoved(rootIntent)
+        stopSelf()
+    }
 
 }

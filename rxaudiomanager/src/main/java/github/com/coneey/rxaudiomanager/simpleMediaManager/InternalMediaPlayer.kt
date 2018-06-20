@@ -38,8 +38,14 @@ open class InternalMediaPlayer(val player: MediaPlayer, val context: Context,
 
         mediaDisposable = mediaSubject
                 .subscribeBy(
-                        onError = { throw it },
-                        onNext = { startMusic(it) }
+                        onError = {
+                            it.printStackTrace()
+                            println("ERROR ARRIVED $it")
+                            throw it
+                        },
+                        onNext = {
+                            startMusic(it)
+                        }
                 )
     }
 
@@ -119,7 +125,7 @@ open class InternalMediaPlayer(val player: MediaPlayer, val context: Context,
         player.let {
             val dataSource = pair.second
             if (dataSource is String || dataSource is AssetFileDescriptor || dataSource is FileDescriptor) {
-                it.reset()
+                resolver.reset()
                 it.setAudioAttributes(pair.first)
 
                 when (dataSource) {
@@ -129,6 +135,7 @@ open class InternalMediaPlayer(val player: MediaPlayer, val context: Context,
                 }
                 currentDataSource = dataSource.toString()
                 currentAudioAttributes = pair.first
+
                 it.prepareAsync()
                 resolver.pushState(MediaState.PREPARING)
             }
