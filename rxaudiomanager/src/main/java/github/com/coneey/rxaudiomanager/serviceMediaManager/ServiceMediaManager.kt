@@ -19,6 +19,10 @@ class ServiceMediaManager(val context: Context) : MediaManager by MediaServiceCo
     private val runnables: MutableList<ServiceRunnable> = ArrayList()
 
     init {
+        restartService()
+    }
+
+    fun restartService() {
         context.startService<PlayerService>()
         println("SERVICE TEST - CREATING")
         observingServiceStateDisposable = PlayerService.listening.subscribe {
