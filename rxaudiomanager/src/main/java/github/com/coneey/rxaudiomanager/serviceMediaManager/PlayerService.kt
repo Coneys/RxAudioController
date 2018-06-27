@@ -60,6 +60,8 @@ class PlayerService : LifecycleService() {
 
     override fun onDestroy() {
         super.onDestroy()
+        println("SERVICE TEST - DESTROYING")
+
         mediaManager.finish()
         mediaListenerResolver.finalize()
         mediaServiceDisposable?.dispose()

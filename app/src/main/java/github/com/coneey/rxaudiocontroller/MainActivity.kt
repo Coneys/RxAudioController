@@ -9,12 +9,14 @@ import org.jetbrains.anko.contentView
 
 class MainActivity : AppCompatActivity() {
 
+    val manager by lazy { MediaManagerFactory.getServiceMediaManager(this) }
+
     var disposable: Disposable? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val manager = MediaManagerFactory.getServiceMediaManager(this)
+
 
         contentView!!.resume_button.setOnClickListener {
             manager.resume()
@@ -33,15 +35,13 @@ class MainActivity : AppCompatActivity() {
             manager.start()
         }
 
+        contentView!!.stream2_button.setOnClickListener {
+            manager.loadStreamMusic("http://janowlubelski.treespot.pl/media/get/147")
+            manager.start()
+        }
+
         disposable = manager.getMediaInfoObservable().subscribe {
             println(it)
-        }
-        if (savedInstanceState == null) {
-
-            manager.useService {
-                manager.loadExternalFileMusic("Music/stephen_stay.mp3")
-                manager.start()
-            }
         }
 
     }
@@ -49,6 +49,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        if (isFinishing)
+            manager.finish()
         disposable?.dispose()
+
     }
 }

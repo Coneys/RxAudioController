@@ -52,6 +52,7 @@ class MediaStateResolver(private val player: MediaPlayer) : MediaPlayer.OnPrepar
         refreshIntervalDisposable?.dispose()
         onPreparedRunnables.clear()
         player.release()
+        preapred=false
     }
 
 

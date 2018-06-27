@@ -6,12 +6,13 @@ import github.com.coneey.rxaudiomanager.mediaListener.Millisecond
 import github.com.coneey.rxaudiomanager.serviceMediaManager.ServiceCommand
 import io.reactivex.Observable
 import io.reactivex.subjects.BehaviorSubject
+import io.reactivex.subjects.PublishSubject
 import io.reactivex.subjects.Subject
 
 internal object MediaServiceCommandEmitter : MediaManager {
 
-    val mediaInfoSubject: Subject<MediaInfo> = BehaviorSubject.create()
-    val commandSubject: Subject<ServiceCommand> = BehaviorSubject.create()
+    val mediaInfoSubject: Subject<MediaInfo> = PublishSubject.create()
+    val commandSubject: Subject<ServiceCommand> = PublishSubject.create()
 
     init {
         commandSubject.doOnNext {

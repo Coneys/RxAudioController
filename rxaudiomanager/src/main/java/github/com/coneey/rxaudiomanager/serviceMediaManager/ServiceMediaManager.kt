@@ -16,11 +16,14 @@ class ServiceMediaManager(val context: Context) : MediaManager by MediaServiceCo
 
     private var observingServiceStateDisposable: Disposable? = null
     private var serviceListening = false
+    private val runnables: MutableList<ServiceRunnable> = ArrayList()
 
     init {
         context.startService<PlayerService>()
+        println("SERVICE TEST - CREATING")
         observingServiceStateDisposable = PlayerService.listening.subscribe {
-            println("SOMETHING ARRIVED $it")
+            println("SERVICE TEST - SOMETHING ARRIVED $it")
+
             serviceListening = it
             if (it) {
                 executeAndClear()
@@ -33,7 +36,11 @@ class ServiceMediaManager(val context: Context) : MediaManager by MediaServiceCo
         runnables.clear()
     }
 
-    private val runnables: MutableList<ServiceRunnable> = ArrayList()
+
+    override fun loadStreamMusic(url: String, attributes: AudioAttributes?) {
+        println("SERVICE TEST - LOADING STREAM MUSIC")
+        MediaServiceCommandEmitter.loadStreamMusic(url, attributes)
+    }
 
 
     override fun loadExternalFileMusic(filePath: String, attributes: AudioAttributes?) {
