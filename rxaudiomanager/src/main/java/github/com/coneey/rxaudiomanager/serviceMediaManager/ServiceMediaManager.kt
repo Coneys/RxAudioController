@@ -5,17 +5,20 @@ import android.content.Context
 import android.media.AudioAttributes
 import android.support.v7.app.AppCompatActivity
 import com.tbruyelle.rxpermissions2.RxPermissions
+import github.com.coneey.rxaudiomanager.mediaListener.MediaInfo
+import github.com.coneey.rxaudiomanager.mediaListener.Millisecond
 import github.com.coneey.rxaudiomanager.simpleMediaManager.MediaManager
 import github.com.coneey.rxaudiomanager.simpleMediaManager.MediaServiceCommandEmitter
+import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 import org.jetbrains.anko.startService
 
 typealias ServiceRunnable = (ServiceMediaManager) -> Unit
 
-class ServiceMediaManager(val context: Context) : MediaManager by MediaServiceCommandEmitter {
+class ServiceMediaManager(val context: Context) : MediaManager {
+
 
     private var observingServiceStateDisposable: Disposable? = null
-    private var serviceListening = false
     private val runnables: MutableList<ServiceRunnable> = ArrayList()
 
     init {
@@ -28,7 +31,6 @@ class ServiceMediaManager(val context: Context) : MediaManager by MediaServiceCo
         observingServiceStateDisposable = PlayerService.listening.subscribe {
             println("SERVICE TEST - SOMETHING ARRIVED $it")
 
-            serviceListening = it
             if (it) {
                 executeAndClear()
             }
@@ -40,38 +42,79 @@ class ServiceMediaManager(val context: Context) : MediaManager by MediaServiceCo
         runnables.clear()
     }
 
+    override fun start() {
+
+        useService {
+            MediaServiceCommandEmitter.start()
+        }
+    }
+
 
     override fun loadStreamMusic(url: String, attributes: AudioAttributes?) {
-        println("SERVICE TEST - LOADING STREAM MUSIC")
-        MediaServiceCommandEmitter.loadStreamMusic(url, attributes)
+        useService {
+            MediaServiceCommandEmitter.loadStreamMusic(url, attributes)
+
+        }
     }
 
 
     override fun loadExternalFileMusic(filePath: String, attributes: AudioAttributes?) {
-
-        if (context is AppCompatActivity) {
-            val permisstions = RxPermissions(context)
-            permisstions.request(Manifest.permission.READ_EXTERNAL_STORAGE)
-                    .take(1)
-                    .doOnNext { println("SOMETHING ARRIVBES IN PERMISSION $it") }
-                    .subscribe { if (it) MediaServiceCommandEmitter.loadExternalFileMusic(filePath, attributes) } // FIXME add disposable?
-        } else throw RuntimeException("Context has to be AppCompatActivity!")
-
+        useService {
+            if (context is AppCompatActivity) {
+                val permisstions = RxPermissions(context)
+                permisstions.request(Manifest.permission.READ_EXTERNAL_STORAGE)
+                        .take(1)
+                        .subscribe { if (it) MediaServiceCommandEmitter.loadExternalFileMusic(filePath, attributes) } // FIXME add disposable?
+            } else throw RuntimeException("Context has to be AppCompatActivity!")
+        }
     }
 
-    fun useService(func: ServiceRunnable) {
-        println("TRYTING TO USE SERVICE BUT $serviceListening")
-        if (serviceListening) {
+    private fun useService(func: ServiceRunnable) {
+        println("TRYTING TO USE SERVICE BUT ${PlayerService.isListening}")
+        if (PlayerService.isListening) {
             func.invoke(this)
         } else {
+            restartService()
             runnables.add(func)
         }
     }
 
     override fun finish() {
+        useService {
+            MediaServiceCommandEmitter.finish()
+        }
         observingServiceStateDisposable?.dispose()
-        MediaServiceCommandEmitter.finish()
+
     }
 
+    override fun loadResourceMusic(resourceId: Int, attributes: AudioAttributes?) {
+        useService { MediaServiceCommandEmitter.loadResourceMusic(resourceId, attributes) }
+    }
+
+    override fun loadInternalFileMusic(filePath: String, attributes: AudioAttributes?) {
+        useService { MediaServiceCommandEmitter.loadInternalFileMusic(filePath, attributes) }
+    }
+
+    override fun seekTo(millisecond: Millisecond) {
+        useService { MediaServiceCommandEmitter.seekTo(millisecond) }
+    }
+
+    override fun pause() {
+        useService { MediaServiceCommandEmitter.pause() }
+    }
+
+    override fun resume() {
+        useService { MediaServiceCommandEmitter.resume() }
+    }
+
+    override fun stop() {
+        useService { MediaServiceCommandEmitter.stop() }
+    }
+
+    override fun reset() {
+        useService { MediaServiceCommandEmitter.reset() }
+    }
+
+    override fun getMediaInfoObservable(): Observable<MediaInfo> = MediaServiceCommandEmitter.getMediaInfoObservable()
 
 }

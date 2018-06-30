@@ -20,6 +20,7 @@ class PlayerService : LifecycleService() {
 
     companion object {
         val listening: Subject<Boolean> = BehaviorSubject.create()
+        var isListening = false
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -31,7 +32,7 @@ class PlayerService : LifecycleService() {
     private fun listenForMedia() {
         if (mediaServiceDisposable == null) {
 
-
+            isListening = true
             mediaServiceDisposable = MediaServiceCommandEmitter.commandSubject.subscribe {
                 when (it) {
                     is ServiceCommand.Finish -> stopSelf()
@@ -39,9 +40,7 @@ class PlayerService : LifecycleService() {
                     is ServiceCommand.LoadStreamMusic -> mediaManager.loadStreamMusic(it.url, it.attr)
                     is ServiceCommand.LoadResourceMusic -> mediaManager.loadResourceMusic(it.resourceId, it.attr)
                     is ServiceCommand.LoadExternalFileMusic -> {
-                        println("WTF STARTING")
                         mediaManager.loadExternalFileMusic(it.filePath, it.attr)
-                        println("WTF ENDING")
                     }
                     is ServiceCommand.LoadInternalFileMusic -> mediaManager.loadInternalFileMusic(it.filePath, it.attr)
                     is ServiceCommand.Pause -> mediaManager.pause()
@@ -61,12 +60,11 @@ class PlayerService : LifecycleService() {
     override fun onDestroy() {
         super.onDestroy()
         println("SERVICE TEST - DESTROYING")
-
         mediaManager.finish()
         mediaListenerResolver.finalize()
         mediaServiceDisposable?.dispose()
+        isListening = false
         listening.onNext(false)
-        println("DESTROY SERVICE")
     }
 
     override fun onTaskRemoved(rootIntent: Intent?) {
