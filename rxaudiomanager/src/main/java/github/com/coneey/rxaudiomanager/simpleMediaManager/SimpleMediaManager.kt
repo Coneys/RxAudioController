@@ -16,7 +16,7 @@ class SimpleMediaManager internal constructor(private val context: Context, play
             val permisstions = RxPermissions(context)
             permisstions.request(Manifest.permission.READ_EXTERNAL_STORAGE)
                     .take(1)
-                    .subscribe { if (it) internalMediaPlayer.loadExternalFileMusic(filePath, attributes) } // FIXME add disposable?
+                    .subscribe { if (it) internalMediaPlayer.loadExternalFileMusic(filePath, attributes) }
         } else throw RuntimeException("Context has to be AppCompatActivity!")
     }
 

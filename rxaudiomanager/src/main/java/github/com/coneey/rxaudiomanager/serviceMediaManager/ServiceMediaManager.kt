@@ -2,6 +2,7 @@ package github.com.coneey.rxaudiomanager.serviceMediaManager
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.media.AudioAttributes
 import android.support.v7.app.AppCompatActivity
 import com.tbruyelle.rxpermissions2.RxPermissions
@@ -11,7 +12,6 @@ import github.com.coneey.rxaudiomanager.simpleMediaManager.MediaManager
 import github.com.coneey.rxaudiomanager.simpleMediaManager.MediaServiceCommandEmitter
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
-import org.jetbrains.anko.startService
 
 typealias ServiceRunnable = (ServiceMediaManager) -> Unit
 
@@ -26,11 +26,8 @@ class ServiceMediaManager(val context: Context) : MediaManager {
     }
 
     fun restartService() {
-        context.startService<PlayerService>()
-        println("SERVICE TEST - CREATING")
+        context.startService(Intent(context, PlayerService::class.java))
         observingServiceStateDisposable = PlayerService.listening.subscribe {
-            println("SERVICE TEST - SOMETHING ARRIVED $it")
-
             if (it) {
                 executeAndClear()
             }
