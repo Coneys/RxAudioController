@@ -43,3 +43,9 @@ Library uses some external classes that are not provided within, so you may have
     api 'io.reactivex.rxjava2:rxandroid:2.0.1'
 
     api 'com.tbruyelle.rxpermissions2:rxpermissions:0.9.5@aar' - for playing external file music. 
+    
+    
+Library can be downloaded from jitpack repository:
+maven { url "https://jitpack.io" }
+by dependency:
+api 'com.github.coneys:RxAudioController:0.2.2'
