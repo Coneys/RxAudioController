@@ -4,8 +4,8 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import github.com.coneey.rxaudiomanager.MediaManagerFactory
 import io.reactivex.disposables.Disposable
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_main.view.*
-import org.jetbrains.anko.contentView
 
 class MainActivity : AppCompatActivity() {
 
@@ -18,24 +18,24 @@ class MainActivity : AppCompatActivity() {
 
 
 
-        contentView!!.resume_button.setOnClickListener {
+        resume_button.setOnClickListener {
             manager.resume()
         }
 
-        contentView!!.pause_button.setOnClickListener {
+        pause_button.setOnClickListener {
             manager.pause()
         }
 
-        contentView!!.stop_button.setOnClickListener {
+        stop_button.setOnClickListener {
             manager.stop()
         }
 
-        contentView!!.stream_button.setOnClickListener {
+        stream_button.setOnClickListener {
             manager.loadStreamMusic("http://janowlubelski.treespot.pl/media/get/149")
             manager.start()
         }
 
-        contentView!!.stream2_button.setOnClickListener {
+        stream2_button.setOnClickListener {
             manager.loadStreamMusic("http://janowlubelski.treespot.pl/media/get/147")
             manager.start()
         }
