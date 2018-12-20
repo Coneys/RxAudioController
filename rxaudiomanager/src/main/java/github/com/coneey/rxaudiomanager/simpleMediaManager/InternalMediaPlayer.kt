@@ -78,7 +78,7 @@ open class InternalMediaPlayer(val player: MediaPlayer, val context: Context,
         val audioAttributes = AudioAttributes.Builder()
                 .setUsage(AudioAttributes.USAGE_MEDIA)
                 .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build()
-        val path = "${context.cacheDir}/$filePath"
+        val path = "${context.filesDir}/$filePath"
         mediaSubject.onNext((attributes ?: audioAttributes) to path)
     }
 
