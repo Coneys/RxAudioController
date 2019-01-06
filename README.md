@@ -4,6 +4,7 @@ Abstract layer that allows to play audio in background seamlessly
 You can create MediaManager by calling one of two factory methods. 
 
 MediaManagerFactory.getMediaManager() - creates simple MediaManager, that will be attached to lifecycle of context, so it will be destroyed after configuration change
+
 MediaManagerFactory.getServiceMediaManager() - creates MediaManager, that will be attached to service.
 
 All functionality are contained in interface MediaManager:
@@ -48,4 +49,4 @@ Library uses some external classes that are not provided within, so you may have
 Library can be downloaded from jitpack repository:
 maven { url "https://jitpack.io" }
 by dependency:
-api 'com.github.coneys:RxAudioController:0.2.2'
+api 'com.github.coneys:RxAudioController:0.2.4'
